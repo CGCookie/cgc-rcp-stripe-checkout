@@ -8,19 +8,7 @@
  */
 
 
-$plugin_url = WP_PLUGIN_URL . '/cgc-rcp-stripe-checkout';
-
-class cgcStripeCheckout {
-
-	function __construct() {
-
-		if( class_exists( 'RCP_Member' ) ) {
-			require_once dirname( __FILE__ ) . "/includes/config.php";
-			require_once dirname( __FILE__ ) . "/includes/charge.php";
-			require_once dirname( __FILE__ ) . "/includes/shortcodes.php";
-
-		if( ! class_exists( 'Stripe\Stripe' ) ) {
-			require_once RCP_PLUGIN_DIR . 'includes/libraries/stripe/init.php';
-		}
-	}
-}
+require_once dirname( __FILE__ ) . "/vendor/autoload.php";
+require_once dirname( __FILE__ ) . "/includes/config.php";
+require_once dirname( __FILE__ ) . "/includes/charge.php";
+require_once dirname( __FILE__ ) . "/includes/shortcodes.php";
