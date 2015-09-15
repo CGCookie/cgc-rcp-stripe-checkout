@@ -1,0 +1,19 @@
+{
+    "name": "cgcookie/cgc-rcp-stripe-checkout",
+    "type": "wordpress-plugin",
+    "description": "Adds Stripe Checkout support to RCP",
+    "keywords": [ "rcp", "stripe", "checkout", "plugin"],
+    "homepage": "http://cgcookie.com",
+    "authors": [
+        {
+            "name": "Jonathan Williamson",
+            "email": "jonathan@cgcookie.com",
+            "homepage": "http://cgcookie.com"
+        }
+    ],
+    "require": {
+        "composer/installers": "~1.0.6",
+        "pippin/restrict-content-pro":"2.*",
+        "stripe/stripe-php": "3.*"
+    }
+}
