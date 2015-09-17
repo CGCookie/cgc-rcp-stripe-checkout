@@ -67,7 +67,7 @@ class CGC_RCP_Member {
 		update_user_meta( $user_id, 'rcp_subscription_level', $plan_id );
 		$member->set_recurring( $yes = true );
 
-
+		// Gather the payment data
 		$payment_data = array(
 			'date'              => date( 'Y-m-d g:i:s', time() ),
 			'subscription'      => $member->get_subscription_name(),
@@ -81,6 +81,7 @@ class CGC_RCP_Member {
 		// Insert payment for user
 		$rcp_payments = new RCP_Payments();
 		$rcp_payments->insert( $payment_data );
+
 	}
 
 }
