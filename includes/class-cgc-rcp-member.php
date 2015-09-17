@@ -30,9 +30,11 @@ class CGC_RCP_Member {
 		$email   = $_POST['stripeEmail'];
 
 		$plan_id = $_POST['subscription'];
-		// $plan_id = intval($plan);
+		$price   = $_POST['price'];
+
 		$plan_name = strtolower( str_replace( ' ', '', rcp_get_subscription_name( $plan_id ) ) );;
-		
+
+		$subscription = rcp_get_subscription_details( $plan_id );
 
 		$customer_id = $member->get_payment_profile_id();
 		
@@ -58,10 +60,27 @@ class CGC_RCP_Member {
 		$member->set_payment_profile_id( $customer->id );
 		$member->set_status( 'active' );
 
-		// need to set plan here
-		update_user_meta( $user_id, 'rcp_subscription_level', $plan_id );
+		// Update the expiration
+		$member->set_expiration_date( rcp_calc_member_expiration( $subscription ) );
 
+		// Update the user's plan and make recurring
+		update_user_meta( $user_id, 'rcp_subscription_level', $plan_id );
 		$member->set_recurring( $yes = true );
+
+
+		$payment_data = array(
+			'date'              => date( 'Y-m-d g:i:s', time() ),
+			'subscription'      => $member->get_subscription_name(),
+			'payment_type' 		=> 'Credit Card',
+			'subscription_key' 	=> $member->get_subscription_key(),
+			'amount' 			=> $price / 100,
+			'user_id' 			=> $member->ID,
+			// 'transaction_id'    => $invoice->id
+		);
+
+		// Insert payment for user
+		$rcp_payments = new RCP_Payments();
+		$rcp_payments->insert( $payment_data );
 	}
 
 }
