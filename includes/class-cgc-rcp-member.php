@@ -1,11 +1,4 @@
 <?php
-/**
- * Plugin Name: CG Cookie Stripe Checkout for RCP
- * Description: Adds support for Stripe Checkout in RCP
- * Author: Jonathan Williamson
- * Author URI: http://cgcookie.com
- * Version: 0.0.1
- */
 
 class CGC_RCP_Member {
 
