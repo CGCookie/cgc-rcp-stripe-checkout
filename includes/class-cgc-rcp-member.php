@@ -29,9 +29,11 @@ class CGC_RCP_Member {
 		$token   = $_POST['stripeToken'];
 		$email   = $_POST['stripeEmail'];
 
-		$price   = rcp_get_subscription_price( 3 ) * 100;
-		$plan_id = strtolower( str_replace( ' ', '', rcp_get_subscription_name( 3 ) ) );
+		$plan_id = $_POST['subscription'];
+		// $plan_id = intval($plan);
+		$plan_name = strtolower( str_replace( ' ', '', rcp_get_subscription_name( $plan_id ) ) );;
 		
+
 		$customer_id = $member->get_payment_profile_id();
 		
 		// Check for exisitng Customer ID, otherwise create new custoemr
@@ -50,13 +52,14 @@ class CGC_RCP_Member {
 		}
 
 		// Subscriber the customer to the plan in Stripe
-		$customer->updateSubscription( array( 'plan' => $plan_id ) );
+		$customer->updateSubscription( array( 'plan' => $plan_name ) );
 
 		// Update member in RCP
 		$member->set_payment_profile_id( $customer->id );
 		$member->set_status( 'active' );
 
 		// need to set plan here
+		update_user_meta( $user_id, 'rcp_subscription_level', $plan_id );
 
 		$member->set_recurring( $yes = true );
 	}

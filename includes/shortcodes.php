@@ -2,12 +2,6 @@
 
 function rcp_stripe_checkout_shortcode( $atts ) {
 
-	$atts = shortcode_atts( array(
-		'plan_id' => 0,
-		'price' => 0,
-		), $atts );
-
-
 	global $rcp_options;
 
 	if( isset( $rcp_options['sandbox'] ) ) {
@@ -15,6 +9,11 @@ function rcp_stripe_checkout_shortcode( $atts ) {
 	} else {
 		$key = $rcp_options['stripe_live_publishable'];
 	}
+
+	$atts = shortcode_atts( array(
+		'plan_id' => 0,
+		'price' => 0,
+		), $atts );
 
 	$user_id      = get_current_user_id();
 	$user         = get_userdata( $user_id );
@@ -37,6 +36,7 @@ function rcp_stripe_checkout_shortcode( $atts ) {
 			data-allow-remember-me="false"
 			>
 		</script>
+		<input type="hidden" name="subscription" value="<?php echo $subscription->id ?>" />
 	</form>
 	<?php
 }
