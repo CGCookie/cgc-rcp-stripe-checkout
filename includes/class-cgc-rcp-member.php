@@ -55,6 +55,9 @@ class CGC_RCP_Member {
 		// Update member in RCP
 		$member->set_payment_profile_id( $customer->id );
 		$member->set_status( 'active' );
+
+		// need to set plan here
+
 		$member->set_recurring( $yes = true );
 	}
 

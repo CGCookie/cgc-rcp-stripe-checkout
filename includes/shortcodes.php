@@ -1,6 +1,13 @@
 <?php 
 
-function rcp_stripe_checkout_shortcode( ) {
+function rcp_stripe_checkout_shortcode( $atts ) {
+
+	$atts = shortcode_atts( array(
+		'plan_id' => 0,
+		'price' => 0,
+		), $atts );
+
+
 	global $rcp_options;
 
 	if( isset( $rcp_options['sandbox'] ) ) {
@@ -12,8 +19,8 @@ function rcp_stripe_checkout_shortcode( ) {
 	$user_id      = get_current_user_id();
 	$user         = get_userdata( $user_id );
 
-	$price        = rcp_get_subscription_price( 3 ) * 100;
-	$subscription = rcp_get_subscription_details( 3 );
+	$subscription = rcp_get_subscription_details( $atts['plan_id'] );
+	$price        = $subscription->price * 100;
 
 
 	?>
