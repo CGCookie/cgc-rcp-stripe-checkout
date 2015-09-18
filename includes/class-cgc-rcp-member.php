@@ -19,6 +19,8 @@ class CGC_RCP_Member {
 
 	public function process_signup() {	
 
+		global $rcp_options;
+
 		$user_id = get_current_user_id();
 		$member  = new RCP_Member( $user_id );
 		
@@ -35,6 +37,7 @@ class CGC_RCP_Member {
 		$plan_name = strtolower( str_replace( ' ', '', rcp_get_subscription_name( $plan_id ) ) );;
 
 		$subscription = rcp_get_subscription_details( $plan_id );
+		$currency     = strtolower( $rcp_options['currency'] );
 
 		$customer_id = $member->get_payment_profile_id();
 		
@@ -51,10 +54,34 @@ class CGC_RCP_Member {
 		} else {
 
 			$customer = \Stripe\Customer::retrieve( $customer_id );	
+
 		}
 
-		// Subscriber the customer to the plan in Stripe
-		$customer->updateSubscription( array( 'plan' => $plan_name ) );
+		// Check for plan in Stripe, otherwise create it.
+		try {
+			$plan = \Stripe\Plan::retrieve( $plan_id );
+			$plan_exists = true;
+		} catch ( Exception $e ) {
+			$plan_exists = false;
+		}
+
+		if ( !$plan_exists ) {
+			\Stripe\Plan::create( array(
+				"amount"         => $price,
+				"interval"       => $subscription->duration_unit,
+				"interval_count" => $subscription,
+				"name"           => $subscription->name,
+				"currency"       => $currency,
+				"id"             => $plan_name
+				)
+			);
+
+		} else {
+
+			// Subscriber the customer to the plan in Stripe
+			$customer->updateSubscription( array( 'plan' => $plan_name ) );
+
+		}
 
 		// Update member in RCP
 		$member->set_payment_profile_id( $customer->id );
