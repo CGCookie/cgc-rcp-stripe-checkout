@@ -22,7 +22,7 @@ class CGC_RCP_Member {
 		global $rcp_options;
 
 		$user_id = get_current_user_id();
-		$member  = new RCP_Member( $user_id );
+		$user_data = get_userdata( $user_id );
 		
 		if( empty( $_POST['stripeToken'] ) ) {
 			wp_die( 'Missing Stripe token, please try again or contact support if the issue persists.' );
@@ -31,83 +31,46 @@ class CGC_RCP_Member {
 		$token   = $_POST['stripeToken'];
 		$email   = $_POST['stripeEmail'];
 
-		$plan_id = $_POST['subscription'];
+		$plan_id = $_POST['subscription_id'];
 		$price   = $_POST['price'];
+		$base_price = $price;
 
 		$plan_name = strtolower( str_replace( ' ', '', rcp_get_subscription_name( $plan_id ) ) );;
 
-		$subscription = rcp_get_subscription_details( $plan_id );
+		$discount       = isset( $_POST['rcp_discount'] ) ? sanitize_text_field( $_POST['rcp_discount'] ) : '';
+		$discount_valid = false;
+		$subscription   = rcp_get_subscription_details( $plan_id );
+		$expiration     = rcp_get_subscription_length( $plan_id );
+
 		$currency     = strtolower( $rcp_options['currency'] );
 
-		$customer_id = $member->get_payment_profile_id();
-		
-		// Check for exisitng Customer ID, otherwise create new custoemr
-		if( empty( $customer_id ) ) {
+		$redirect = rcp_get_current_url();
 
-			$customer = \Stripe\Customer::create(array(
-				'email' => $email,
-				'card'  => $token
-			));
-
-			$customer_id = $customer->id;
-
-		} else {
-
-			$customer = \Stripe\Customer::retrieve( $customer_id );	
-
-		}
-
-		// Check for plan in Stripe, otherwise create it.
-		try {
-			$plan = \Stripe\Plan::retrieve( $plan_id );
-			$plan_exists = true;
-		} catch ( Exception $e ) {
-			$plan_exists = false;
-		}
-
-		if ( !$plan_exists ) {
-			\Stripe\Plan::create( array(
-				"amount"         => $price,
-				"interval"       => $subscription->duration_unit,
-				"interval_count" => $subscription,
-				"name"           => $subscription->name,
-				"currency"       => $currency,
-				"id"             => $plan_name
-				)
-			);
-
-		} else {
-
-			// Subscriber the customer to the plan in Stripe
-			$customer->updateSubscription( array( 'plan' => $plan_name ) );
-
-		}
-
-		// Update member in RCP
-		$member->set_payment_profile_id( $customer->id );
-		$member->set_status( 'active' );
-
-		// Update the expiration
-		$member->set_expiration_date( rcp_calc_member_expiration( $subscription ) );
-
-		// Update the user's plan and make recurring
-		update_user_meta( $user_id, 'rcp_subscription_level', $plan_id );
-		$member->set_recurring( $yes = true );
-
-		// Gather the payment data
-		$payment_data = array(
-			'date'              => date( 'Y-m-d g:i:s', time() ),
-			'subscription'      => $member->get_subscription_name(),
-			'payment_type' 		=> 'Credit Card',
-			'subscription_key' 	=> $member->get_subscription_key(),
-			'amount' 			=> $price / 100,
-			'user_id' 			=> $member->ID,
-			// 'transaction_id'    => $invoice->id
+		$subscription_data = array(
+			'price'             => $price,
+			'discount'          => $base_price - $price,
+			'discount_code'     => $discount,
+			'fee' 			    => ! empty( $subscription->fee ) ? number_format( $subscription->fee, 2 ) : 0,
+			'length' 			=> $expiration->duration,
+			'length_unit' 		=> strtolower( $expiration->duration_unit ),
+			'subscription_id'   => $subscription->id,
+			'subscription_name' => $subscription->name,
+			'key' 				=> $subscription_key,
+			'user_id' 			=> $user_data->id,
+			'user_name' 		=> $user_data->user_login,
+			'user_email' 		=> $user_data->user_email,
+			'currency' 			=> $rcp_options['currency'],
+			'auto_renew' 		=> true,
+			'return_url' 		=> $redirect,
+			'new_user' 			=> false,
+			'post_data' 		=> $_POST
 		);
 
-		// Insert payment for user
-		$rcp_payments = new RCP_Payments();
-		$rcp_payments->insert( $payment_data );
+		// Update the user's plan
+		update_user_meta( $user_id, 'rcp_subscription_level', $plan_id );
+
+		// send all of the subscription data off for processing by the gateway
+		rcp_send_to_gateway( 'stripe', apply_filters( 'rcp_subscription_data', $subscription_data ) );
 
 	}
 

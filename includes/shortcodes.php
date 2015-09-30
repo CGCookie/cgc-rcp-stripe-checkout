@@ -37,7 +37,7 @@ function rcp_stripe_checkout_shortcode( $atts ) {
 			data-allow-remember-me="false"
 			>
 		</script>
-		<input type="hidden" name="subscription" value="<?php echo $subscription->id ?>" />
+		<input type="hidden" name="subscription_id" value="<?php echo $subscription->id ?>" />
 		<input type="hidden" name="price" value="<?php echo $price ?>" />
 	</form>
 	<?php
