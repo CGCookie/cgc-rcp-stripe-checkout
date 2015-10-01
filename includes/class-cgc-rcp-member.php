@@ -67,7 +67,6 @@ class CGC_RCP_Member {
 		// send all of the subscription data off for processing by the gateway
 		rcp_send_to_gateway( 'stripe', apply_filters( 'rcp_subscription_data', $subscription_data ) );
 
-		do_action( 'rcp_stripe_checkout_signup', $user_id, $subscription->name );
 
 	}
 
