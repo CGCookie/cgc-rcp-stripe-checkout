@@ -17,7 +17,7 @@ class CGC_RCP_Member {
 
 	}
 
-	public function process_signup() {	
+	public function process_signup() {
 
 		global $rcp_options;
 
@@ -28,23 +28,18 @@ class CGC_RCP_Member {
 			wp_die( 'Missing Stripe token, please try again or contact support if the issue persists.' );
 		}
 
-		$token   = $_POST['stripeToken'];
-		$email   = $_POST['stripeEmail'];
+		$token             = $_POST['stripeToken'];
+		$email             = $_POST['stripeEmail'];
+		$plan_id           = $_POST['subscription_id'];
 
-		$plan_id = $_POST['subscription_id'];
-		$price   = $_POST['price'];
-		$base_price = $price;
-
-		$plan_name = strtolower( str_replace( ' ', '', rcp_get_subscription_name( $plan_id ) ) );;
-
-		$discount       = isset( $_POST['rcp_discount'] ) ? sanitize_text_field( $_POST['rcp_discount'] ) : '';
-		$discount_valid = false;
-		$subscription   = rcp_get_subscription_details( $plan_id );
-		$expiration     = rcp_get_subscription_length( $plan_id );
-
-		$currency     = strtolower( $rcp_options['currency'] );
-
-		$redirect = rcp_get_current_url();
+		$subscription      = rcp_get_subscription_details( $plan_id );
+		$price             = $subscription->price;
+		$base_price        = $price;
+		$discount          = isset( $_POST['rcp_discount'] ) ? sanitize_text_field( $_POST['rcp_discount'] ) : '';
+		$discount_valid    = false;
+		$expiration        = rcp_get_subscription_length( $plan_id );
+		$currency          = strtolower( $rcp_options['currency'] );
+		$redirect          = rcp_get_current_url();
 
 		$subscription_data = array(
 			'price'             => $price,
@@ -71,6 +66,8 @@ class CGC_RCP_Member {
 
 		// send all of the subscription data off for processing by the gateway
 		rcp_send_to_gateway( 'stripe', apply_filters( 'rcp_subscription_data', $subscription_data ) );
+
+		do_action( 'rcp_stripe_checkout_signup', $user_id, $subscription->name );
 
 	}
 
