@@ -39,6 +39,7 @@ function rcp_stripe_checkout_shortcode( $atts ) {
 		</script>
 		<input type="hidden" name="subscription_id" value="<?php echo $subscription->id ?>" />
 		<input type="hidden" name="price" value="<?php echo $price ?>" />
+		<input type="hidden" name="source" value="stripe-checkout" />
 	</form>
 	<?php
 

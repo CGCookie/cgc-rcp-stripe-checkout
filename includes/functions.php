@@ -2,7 +2,7 @@
 
 function cgc_rcp_process_checkout() {
 
-	if ( isset( $_POST['stripeToken'] ) ){
+	if ( isset( $_POST['stripeToken'] ) && 'stripe-checkout' == $_POST['source'] ){
 
 		$cgc_member = new CGC_RCP_Member();
 		$cgc_member->process_signup();
