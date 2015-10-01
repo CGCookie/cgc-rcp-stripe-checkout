@@ -4,7 +4,7 @@
  * Description: Adds support for Stripe Checkout in RCP
  * Author: Jonathan Williamson
  * Author URI: http://cgcookie.com
- * Version: 0.0.1
+ * Version: 1.0.0
  */
 
 
