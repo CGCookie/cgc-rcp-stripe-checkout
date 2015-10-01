@@ -55,7 +55,7 @@ class CGC_RCP_Member {
 			'length_unit' 		=> strtolower( $expiration->duration_unit ),
 			'subscription_id'   => $subscription->id,
 			'subscription_name' => $subscription->name,
-			'key' 				=> $subscription_key,
+			'key' 				=> '',
 			'user_id' 			=> $user_data->id,
 			'user_name' 		=> $user_data->user_login,
 			'user_email' 		=> $user_data->user_email,
